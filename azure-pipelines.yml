@@ -1,0 +1,149 @@
+trigger:
+  - master
+  - feature/*
+
+pr:
+  - master
+
+pool:
+  vmImage: "windows-latest"
+
+variables:
+  apiName: "seed-api"
+  devEnvironmentName: Development
+  prodEnvironmentName: Production
+  deploymentName: ${{ replace(variables['apiName'],'-','_') }}
+  azureSubscription: "EY-CTSBP-PROD-CodeHub-01-39844557"
+  sonarConnection: "SonarQube-Dev"
+  nodeVersion: "14.x"
+
+stages:
+  - stage: Build
+    jobs:
+      - job: Build
+        steps:
+          - task: NodeTool@0
+            inputs:
+              versionSpec: $(nodeVersion)
+            displayName: "Install Node.js"
+
+          - script: |
+              npm install
+            displayName: "Install dependencies"
+
+          - script: |
+              npm run lint
+            displayName: "Lint check"
+
+          - script: |
+              npm run build
+            displayName: "Build"
+
+          - script: |
+              npm test
+            displayName: "Run unit tests"
+
+          - task: PublishCodeCoverageResults@1
+            displayName: 'Publish coverage results'
+            inputs:
+              codeCoverageTool: 'Cobertura'
+              summaryFileLocation: '$(System.DefaultWorkingDirectory)/coverage/cobertura-coverage.xml'
+
+          - task: PublishTestResults@2
+            displayName: 'Publish unit test results'
+            inputs:
+              testResultsFormat: 'JUnit'
+              testResultsFiles: 'junit.xml'
+              failTaskOnFailedTests: true
+              publishRunAttachments: false
+
+          - bash: |
+              REPO=$(Build.Repository.Name)
+              REPO=$(echo $REPO | sed -e "s/\//-/g")
+              echo "##vso[task.setvariable variable=sonarKey]$REPO"
+            displayName: "SonarQube Get Project Key"
+
+          - task: SonarQubePrepare@4
+            inputs:
+              SonarQube: $(sonarConnection)
+              scannerMode: "CLI"
+              configMode: "manual"
+              cliProjectKey: $(sonarKey)
+              cliProjectName: $(Build.Repository.Name)
+              cliSources: "src"
+              extraProperties: |
+                sonar.sourceEncoding=UTF-8
+                sonar.exclusions=**/*spec.js
+                sonar.eslint.reportPaths=report.json
+                sonar.javascript.lcov.reportPaths=coverage/lcov.info
+                sonar.testExecutionReportPaths=test-report.xml
+                sonar.tests=tests
+                sonar.coverage.exclusions=src/bin/*,src/utils/dbConnect.js
+
+          - task: SonarQubeAnalyze@4
+
+          - task: SonarQubePublish@4
+            inputs:
+              pollingTimeoutSec: "300"
+
+          - task: sonar-buildbreaker@8
+            displayName: "SonarQube Check Quality Gate"
+            inputs:
+              SonarQube: $(sonarConnection)
+
+          - task: ArchiveFiles@2
+            displayName: "Archive files"
+            inputs:
+              rootFolderOrFile: "$(System.DefaultWorkingDirectory)"
+              includeRootFolder: false
+              archiveType: zip
+              archiveFile: $(Build.ArtifactStagingDirectory)/api-$(Build.BuildId).zip
+              replaceExistingArchive: true
+
+          - publish: $(Build.ArtifactStagingDirectory)/api-$(Build.BuildId).zip
+            displayName: "Publish artifact"
+            artifact: drop
+
+  - stage: Deploy_Dev
+    variables:
+      - group: ${{ variables.apiName }}-dev
+    condition: and(succeeded(), ne(variables['Build.Reason'], 'PullRequest'))
+    jobs:
+      - deployment: ${{ variables.deploymentName }}_dev
+        environment: ${{ variables.devEnvironmentName }}
+        strategy:
+          runOnce:
+            deploy:
+              steps:
+                - task: AzureWebApp@1
+                  displayName: "Azure Web App Deploy: $(webApp)"
+                  inputs:
+                    azureSubscription: "$(azureSubscription)"
+                    appType: webAppLinux
+                    appName: $(webApp)
+                    runtimeStack: "NODE|14-lts"
+                    package: $(Pipeline.Workspace)/drop/api-$(Build.BuildId).zip
+                    startUpCommand: "npm run start"
+                    appSettings: "-APPINSIGHTS_INSTRUMENTATIONKEY $(APPINSIGHTS_INSTRUMENTATIONKEY) -DATABASE $(DATABASE) -APP_NAME $(APP_NAME) -NODE_ENV $(NODE_ENV) -LOG_LEVEL $(LOG_LEVEL)"
+
+  - stage: Deploy_Prod
+    variables:
+      - group: ${{ variables.apiName }}-prod
+    condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/master'))
+    jobs:
+      - deployment: ${{ variables.deploymentName }}_prod
+        environment: ${{ variables.prodEnvironmentName }}
+        strategy:
+          runOnce:
+            deploy:
+              steps:
+                - task: AzureWebApp@1
+                  displayName: "Azure Web App Deploy: $(webApp)"
+                  inputs:
+                    azureSubscription: "$(azureSubscription)"
+                    appType: webAppLinux
+                    appName: $(webApp)
+                    runtimeStack: "NODE|14-lts"
+                    package: $(Pipeline.Workspace)/drop/api-$(Build.BuildId).zip
+                    startUpCommand: "npm run start"
+                    appSettings: "-APPINSIGHTS_INSTRUMENTATIONKEY $(APPINSIGHTS_INSTRUMENTATIONKEY) -DATABASE $(DATABASE) -APP_NAME $(APP_NAME) -NODE_ENV $(NODE_ENV) -LOG_LEVEL $(LOG_LEVEL)"
