@@ -1,0 +1,75 @@
+{
+  "type": "module",
+  "name": "api",
+  "version": "1.0.0",
+  "private": true,
+  "author": "Victor Ortegon",
+  "license": "MIT",
+  "scripts": {
+    "dev": "nodemon --exec npm run start",
+    "start": "node ./src/bin/start.js",
+    "lint:fix": "eslint src/**/*.* --fix",
+    "lint": "eslint -f json -o report.json src/**/*.*",
+    "test": "jest --forceExit --detectOpenHandles --silent --setupFiles dotenv/config --testTimeout 30000 --ci --reporters=default --reporters=jest-junit --coverage"
+  },
+  "dependencies": {
+    "applicationinsights": "^2.2.0",
+    "bcrypt": "^5.0.1",
+    "body-parser": "^1.19.1",
+    "cors": "^2.8.5",
+    "dotenv": "^14.2.0",
+    "express": "^4.17.2",
+    "express-oauth-server": "^2.0.0",
+    "express-winston": "^4.2.0",
+    "mongoose": "^6.1.7",
+    "morgan": "^1.10.0",
+    "winston": "^3.4.0",
+    "winston-console-format": "^1.0.8"
+  },
+  "devDependencies": {
+    "@babel/plugin-transform-modules-commonjs": "^7.16.8",
+    "cuid": "^2.1.8",
+    "eslint": "^8.7.0",
+    "eslint-config-airbnb-base": "^15.0.0",
+    "eslint-config-prettier": "^8.3.0",
+    "eslint-plugin-import": "^2.25.4",
+    "eslint-plugin-jest": "^25.7.0",
+    "eslint-plugin-prettier": "^4.0.0",
+    "jest": "^27.4.7",
+    "jest-junit": "^13.0.0",
+    "jest-sonar-reporter": "^2.0.0",
+    "lodash": "^4.17.21",
+    "nodemon": "^2.0.15",
+    "prettier": "^2.5.1",
+    "supertest": "^6.2.2"
+  },
+  "jest": {
+    "testRunner": "jest-jasmine2",
+    "verbose": true,
+    "testURL": "http://localhost/",
+    "testEnvironment": "node",
+    "setupFilesAfterEnv": [
+      "<rootDir>/test-db-setup.js"
+    ],
+    "coverageDirectory": "<rootDir>/test-reports/coverage",
+    "restoreMocks": true,
+    "testResultsProcessor": "jest-sonar-reporter",
+    "collectCoverage": true,
+    "collectCoverageFrom": [
+      "src/**/*.js",
+      "!src/bin/*.js",
+      "!src/utils/dbConnect.js"
+    ],
+    "coverageReporters": [
+      "cobertura",
+      "lcov",
+      "text"
+    ]
+  },
+  "jest-junit": {
+    "outputDirectory": "test-reports"
+  },
+  "jestSonar": {
+    "reportPath": "test-reports"
+  }
+}
