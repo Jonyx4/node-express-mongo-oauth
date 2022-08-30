@@ -1,3 +1,4 @@
+name: DAST - ZAP Action Full Scan
 on: [push]
 
 jobs:
