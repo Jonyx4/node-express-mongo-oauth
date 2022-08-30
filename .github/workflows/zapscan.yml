@@ -1,5 +1,26 @@
-steps:
-  - name: ZAP Scan
+name: ZAP DAST Scan
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    # The branches below must be a subset of the branches above
+    branches: [ "main" ]
+  schedule:
+    - cron: '18 9 * * 4'
+
+permissions:
+  contents: read
+
+jobs:
+  codacy-security-scan:
+    permissions:
+      contents: read # for actions/checkout to fetch code
+      security-events: write # for github/codeql-action/upload-sarif to upload SARIF results
+    name: ZAP DAST Scan
+    runs-on: ubuntu-latest
+    steps:
+  - name: ZAP DAST Scan
     uses: zaproxy/action-full-scan@v0.4.0
     with:
       target: 'https://www.zaproxy.org/'
