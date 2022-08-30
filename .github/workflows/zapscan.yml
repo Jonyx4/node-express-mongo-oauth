@@ -1,26 +1,18 @@
-name: ZAP DAST Scan
-
-on:
-  push:
-    branches: [ "main" ]
-  pull_request:
-    # The branches below must be a subset of the branches above
-    branches: [ "main" ]
-  schedule:
-    - cron: '18 9 * * 4'
-
-permissions:
-  contents: read
+on: [push]
 
 jobs:
-  codacy-security-scan:
-    permissions:
-      contents: read # for actions/checkout to fetch code
-      security-events: write # for github/codeql-action/upload-sarif to upload SARIF results
-    name: ZAP DAST Scan
+  zap_scan:
     runs-on: ubuntu-latest
+    name: Scan the webapplication
     steps:
-  - name: ZAP DAST Scan
-    uses: zaproxy/action-full-scan@v0.4.0
-    with:
-      target: 'https://www.zaproxy.org/'
+      - name: Checkout
+        uses: actions/checkout@v2
+        with:
+          ref: master
+      - name: ZAP Scan
+        uses: zaproxy/action-full-scan@v0.4.0
+        with:
+          docker_name: 'owasp/zap2docker-stable'
+          target: 'https://www.zaproxy.org/'
+          rules_file_name: '.zap/rules.tsv'
+          cmd_options: '-a'
