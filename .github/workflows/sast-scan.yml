@@ -1,0 +1,11 @@
+name: SAST Scaan
+on: [push]
+
+jobs:
+  sast_scan:
+    runs-on: ubuntu-latest
+    name: SAST Scan
+    steps:
+    - uses: AppThreat/sast-scan-action@master
+      with:
+        type: "nodejs"
