@@ -1,4 +1,4 @@
-name: SAST Scaan
+name: SAST - Scan
 on: [push]
 
 jobs:
