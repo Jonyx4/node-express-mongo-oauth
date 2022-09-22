@@ -1,9 +1,9 @@
 import mongoose from 'mongoose';
-import { getOne, getMany, createOne, updateOne, removeOne } from '../../src/utils/crud.js';
+import { findById, find, create, updateOne, removeOne } from '../../src/utils/crud.js';
 import List from '../../src/resources/list/listModel.js';
 
 describe('crud controllers', () => {
-  describe('getOne', () => {
+  describe('findById', () => {
     test('Given an existing list when I get it by id then it is listed', async () => {
       expect.assertions(2);
 
@@ -26,7 +26,7 @@ describe('crud controllers', () => {
         }
       };
 
-      await getOne(List)(req, res);
+      await findById(List)(req, res);
     });
 
     test('Given an invalid input when I get it by id then a 404 data not found error is returned', async () => {
@@ -38,11 +38,11 @@ describe('crud controllers', () => {
 
       const res = {};
 
-      await expect(getOne(List)(req, res)).rejects.toThrow('Data not found');
+      await expect(findById(List)(req, res)).rejects.toThrow('Data not found');
     });
   });
 
-  describe('getMany', () => {
+  describe('find', () => {
     test('Given and existing list when I query all lists then all lists are returned', async () => {
       expect.assertions(2);
 
@@ -59,7 +59,7 @@ describe('crud controllers', () => {
         }
       };
 
-      await getMany(List)(req, res);
+      await find(List)(req, res);
     });
 
     test('Given no existing lists when I query all then a 404 no doc was found is returned', async () => {
@@ -71,11 +71,11 @@ describe('crud controllers', () => {
 
       const res = {};
 
-      await expect(getMany(List)(req, res)).rejects.toThrow('Data not found');
+      await expect(find(List)(req, res)).rejects.toThrow('Data not found');
     });
   });
 
-  describe('createOne', () => {
+  describe('create', () => {
     test('Given a valid list when I create it then the list is created and returned', async () => {
       expect.assertions(2);
 
@@ -95,7 +95,7 @@ describe('crud controllers', () => {
         }
       };
 
-      await createOne(List)(req, res);
+      await create(List)(req, res);
     });
   });
 

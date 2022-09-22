@@ -24,7 +24,7 @@ export const find = (model) => async (req, res) => {
 
 export const create = (model) => async (req, res) => {
   const doc = await model.create(req.body);
-  res.status(201).json({ data: await deleteMongoProperties(doc) });
+  res.status(201).json({ data: doc });
 };
 
 export const updateOne = (model) => async (req, res) => {
