@@ -1,14 +1,11 @@
 # Node.js API Starter
 
-
-
 ## Table of contents
 
 - [Project Description](README.md/#project-description)
 - [Installation](README.md/#installation)
 - [Structure](README.md/#structure)
 - [Usage](README.md/#usage)
-- [Azure Pipeline](README.md/#pipeline)
 - [Unit test](README.md/#unittest)
 - [References](README.md/#references)
 
@@ -31,7 +28,6 @@ Seed repository with all the files and folders necessary to start working on the
 │   ├── ├── ├──	HealthRouter.js  --> Endpoint that returns the health of the service.
 │   ├──	utils  --> Basically a bunch of functions that help in the internal working of the app.
 │   ├──	app.js  --> Express module file that manages http requests and middleware configurations.
-├── azure-pipelines.yml  --> yaml file pipeline for CI/CD process.
 ├── .env.example --> File that contains and example of how to use the env variables.
 ├── test  --> Folder where all the unit tests to be used must be included.
 │   ├── resources
@@ -56,73 +52,6 @@ npm run dev
 ```
 
 Then, open you project in `http://localhost:3000/api`
-
-## Pipeline
-
-Basic Structure of a azure-pipelines.yml YAML file
-
-```bash
-
-Pipeline
-	Build Stage
-		Job
-			steps
-			...
-	...
-	DEV Deploy Stage
-		variables:
-			group: apiName-dev
-		Job
-			Steps
-			...
-	...
-	QA Deploy  Stage
-	variables:
-			group: apiName-qa
-		Job
-			Steps
-			...
-	PROD Deploy Stage
-	variables:
-			group: apiName-prod
-		Job
-			Steps
-			...
-
-```
-
-This pipeline is configured to be deployed in 2 environments (development and production) and use a Sonar Connection to code quality and security.
-
-### Variables
-
-for each project is necesary define this variables:
-
-- **apiName:** name of the project or repository.
-- **azureSubscription:** azure subscription to use.
-- **sonarConnection:** sonar conecction to use.
-
-The variable **deploymentName** should not be modified.
-
-Other variables, it is recommended to leave the default values:
-
-- **devEnvironmentName:** Development
-- **prodEnvironmentName:** Production
-- **nodeVersion:** "14.x"
-
-### Variables group and environment variables
-
-To link the environment variables with the group variables, it is necessary to define them in the app setings property of the AzureWebApp @ 1 task of each deployment stage:
-
-```bash
-appSettings: '-APPINSIGHTS_INSTRUMENTATIONKEY $(APPINSIGHTS_INSTRUMENTATIONKEY) -DATABASE $(DATABASE) -TEST_DATABASE $(TEST_DATABASE)'
-```
-
-Note that the name of the group variable to be used in each environment is automatically defined as follows:
-
-- apiName-dev
-- apiName-prod
-
-**more information on creating variable groups and pipelines:** [How to configure an Application Pipeline](https://github.com/ey-ctp/code-hub-internal-docs/blob/master/jedi-order/howTo/application-pipeline.md)
 
 ### Sonar
 
