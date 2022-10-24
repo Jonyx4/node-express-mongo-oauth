@@ -23,9 +23,6 @@ const server = http.createServer(app);
 run();
 
 async function run() {
-  logger.info(
-    'You can contribute with this project on this repo: https://github.com/vortegon/node-express-mongo-appinsights'
-  );
   await dbConnect();
   server.listen(app.get('port'));
   server.on('error', onError);
