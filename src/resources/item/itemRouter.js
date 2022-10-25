@@ -5,7 +5,7 @@ import itemControllers from './itemControllers.js';
 const itemRouter = Router();
 
 // /api/item
-itemRouter.route('/').get(catchErrors(itemControllers.getMany)).post(catchErrors(itemControllers.createOne));
+itemRouter.route('/').get(catchErrors(itemControllers.find)).post(catchErrors(itemControllers.create));
 
 // /api/item/:id
 itemRouter
