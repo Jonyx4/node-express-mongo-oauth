@@ -5,7 +5,7 @@ import listControllers from './listControllers.js';
 const listRouter = Router();
 
 // /api/list
-listRouter.route('/').get(catchErrors(listControllers.getMany)).post(catchErrors(listControllers.createOne));
+listRouter.route('/').get(catchErrors(listControllers.find)).post(catchErrors(listControllers.create));
 
 // /api/list/:id
 listRouter
